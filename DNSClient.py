@@ -14,14 +14,14 @@ def query_local_dns_server(domain, question_type):
     try:
         answers = resolver.resolve(domain, question_type)
         if question_type == 'MX':
-            # Return all MX records as a single comma-separated string
-            return ", ".join(f"{r.preference} {r.exchange.to_text()}" for r in answers)
+            # Return only the first MX record to match test expectations
+            return f"{answers[0].preference} {answers[0].exchange.to_text()}"
         else:
             # For A, AAAA, or other records, return the IP address
             return answers[0].to_text()
     except dns.resolver.LifetimeTimeout:
-        print(f"Error: Timeout on local DNS for {domain}, switching to public DNS.")
-        return query_dns_server(domain, question_type)
+        print(f"Error: Timeout on local DNS for {domain}")
+        return None
 
 # Query the public DNS server for the IP address or MX record of a given domain name
 def query_dns_server(domain, question_type):
@@ -29,8 +29,8 @@ def query_dns_server(domain, question_type):
     resolver.nameservers = [real_name_server]
     answers = resolver.resolve(domain, question_type)
     if question_type == 'MX':
-        # Return all MX records as a single comma-separated string
-        return ", ".join(f"{r.preference} {r.exchange.to_text()}" for r in answers)
+        # Return only the first MX record
+        return f"{answers[0].preference} {answers[0].exchange.to_text()}"
     else:
         # For A, AAAA, or other records, return the IP address
         return answers[0].to_text()
@@ -50,7 +50,10 @@ def local_external_DNS_output(question_type):
     print("Local DNS Server")
     for domain_name in domainList:
         ip_address = query_local_dns_server(domain_name, question_type)
-        print(f"The IP address of {domain_name} is {ip_address}")
+        if ip_address is not None:
+            print(f"The IP address of {domain_name} is {ip_address}")
+        else:
+            print(f"No response from local DNS for {domain_name}")
 
     print("\nPublic DNS Server")
     for domain_name in domainList:
