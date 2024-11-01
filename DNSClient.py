@@ -1,8 +1,8 @@
 import dns.resolver
 
 # Set the IP address of the local DNS server and a public DNS server
-local_host_ip = '127.0.0.1'  # Localhost for a local DNS server
-real_name_server = '8.8.8.8'  # Google public DNS server
+local_host_ip = '209.18.47.62'  # IP for a local DNS server
+real_name_server = '8.8.8.8'  # Example of a public DNS server (Google DNS)
 
 # Create a list of domain names to query - use the same list from the DNS Server
 domainList = ['example.com.', 'safebank.com.', 'google.com.', 'nyu.edu.', 'legitsite.com.']
@@ -12,13 +12,9 @@ domainList = ['example.com.', 'safebank.com.', 'google.com.', 'nyu.edu.', 'legit
 def query_local_dns_server(domain, question_type):
     resolver = dns.resolver.Resolver()
     resolver.nameservers = [local_host_ip]  # Use local DNS server IP
-    try:
-        answers = resolver.resolve(domain, question_type)  # Provide the domain and question type
-        ip_address = answers[0].to_text()  # Extract IP address
-        return ip_address
-    except dns.resolver.LifetimeTimeout:
-        print(f"Error: Timeout occurred while querying local DNS for {domain}")
-        return None
+    answers = resolver.resolve(domain, question_type)  # Provide the domain and question type
+    ip_address = answers[0].to_text()  # Extract IP address
+    return ip_address
 
 
 # Define a function to query a public DNS server for the IP address of a given domain name
@@ -35,7 +31,7 @@ def compare_dns_servers(domainList, question_type):
     for domain_name in domainList:
         local_ip_address = query_local_dns_server(domain_name, question_type)
         public_ip_address = query_dns_server(domain_name, question_type)
-        if local_ip_address is None or local_ip_address != public_ip_address:
+        if local_ip_address != public_ip_address:
             return False
     return True
 
@@ -45,10 +41,7 @@ def local_external_DNS_output(question_type):
     print("Local DNS Server")
     for domain_name in domainList:
         ip_address = query_local_dns_server(domain_name, question_type)
-        if ip_address is not None:
-            print(f"The IP address of {domain_name} is {ip_address}")
-        else:
-            print(f"No response from local DNS for {domain_name}")
+        print(f"The IP address of {domain_name} is {ip_address}")
 
     print("\nPublic DNS Server")
     for domain_name in domainList:
@@ -56,8 +49,7 @@ def local_external_DNS_output(question_type):
         print(f"The IP address of {domain_name} is {ip_address}")
 
 
-# Define a testing function for part 2
-def exfiltrate_info(domain, question_type):
+def exfiltrate_info(domain, question_type):  # testing method for part 2
     data = query_local_dns_server(domain, question_type)
     return data
 
