@@ -11,6 +11,8 @@ domainList = ['example.com.', 'safebank.com.', 'google.com.', 'nyu.edu.', 'legit
 def query_local_dns_server(domain, question_type):
     resolver = dns.resolver.Resolver()
     resolver.nameservers = [local_host_ip]
+    resolver.timeout = 10  # Increase timeout to 10 seconds
+    resolver.lifetime = 20  # Increase the overall lifetime of the query to 20 seconds
     try:
         answers = resolver.resolve(domain, question_type)
         if question_type == 'MX':
